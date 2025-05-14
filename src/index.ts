@@ -147,10 +147,10 @@ app.post("/data/decrypt", async (c) => {
 serve(
   {
     fetch: app.fetch,
-    port: 3000,
+    port: 3001,
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
-    console.log("API Documentation is available at http://localhost:3000");
+    console.log("API Documentation is available at http://localhost:3001");
   }
 );
