@@ -2,10 +2,10 @@
   "name": "defense-system-helper",
   "version": "1.0.0",
   "description": "Military-grade security API with quantum-safe encryption",
-  "main": "app/app.ts",
+  "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node app/app.ts",
-    "dev": "nodemon --exec ts-node app/app.ts",
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
     "test": "jest",
     "test:unit": "jest tests/unit",
