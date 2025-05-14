@@ -31,9 +31,30 @@ api-application/
 ├─ config/            # Configuration files
 ├─ database/         # Database migrations and seeds
 ├─ logs/            # Application logs
+├── python/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   └── schemas.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── auth_service.py
+│   │   │   ├── crypto_service.py
+│   │   │   └── integrity_service.py
+│   │   └── utils/
+│   │       ├── __init__.py
+│   │       └── security.py
+│   └── requirements.txt
 ├─ tests/
 │  ├─ unit/        # Unit tests
 │  ├─ integration/ # Integration tests
+├─ Readme.md
+├─ package.json
+├─ jest.config.js
+├─ .gitignore
+├─ vercel.json
 ```
 
 ## Setup
