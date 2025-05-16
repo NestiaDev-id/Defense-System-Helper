@@ -18,7 +18,7 @@ app.use("/*", prettyJSON());
 app.get(
   "/",
   apiReference({
-    theme: "kepler",
+    theme: "default",
     layout: "classic",
     spec: {
       url: "/openapi.json",
