@@ -24,6 +24,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*", "app/**/*", "config/**/*", "tests/**/*"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
