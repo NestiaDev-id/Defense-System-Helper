@@ -16,12 +16,14 @@
     "@hono/node-server": "^1.8.2",
     "@hono/swagger-ui": "^0.2.1",
     "@scalar/hono-api-reference": "^0.8.10",
+    "bcrypt": "^5.1.1",
     "buffer": "^6.0.3",
     "hono": "^4.7.10",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.11.24",
