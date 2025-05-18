@@ -16,7 +16,7 @@ describe("Authentication Endpoints", () => {
       });
 
       expect(res.status).toBe(200);
-      const data = await res.json();
+      const data = (await res.json()) as { success: boolean };
       expect(data.success).toBe(true);
     });
   });
@@ -35,7 +35,7 @@ describe("Authentication Endpoints", () => {
       });
 
       expect(res.status).toBe(200);
-      const data = await res.json();
+      const data = (await res.json()) as { token: string };
       expect(data.token).toBeDefined();
     });
 
@@ -52,7 +52,7 @@ describe("Authentication Endpoints", () => {
       });
 
       expect(res.status).toBe(401);
-      const data = await res.json();
+      const data = (await res.json()) as { error: string };
       expect(data.error).toBe("Invalid credentials");
     });
   });

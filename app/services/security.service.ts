@@ -59,13 +59,12 @@ export class SecurityService {
   }
 
   static async hashPassword(password: string, options = {}): Promise<string> {
-    // Forward to Python service for Argon2id hashing
     const response = await fetch("http://localhost:8000/auth/hash-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password, ...options }),
     });
-    const data = await response.json();
+    const data = (await response.json()) as { hash: string };
     return data.hash;
   }
 
@@ -73,13 +72,12 @@ export class SecurityService {
     password: string,
     hash: string
   ): Promise<boolean> {
-    // Forward to Python service for verification
     const response = await fetch("http://localhost:8000/auth/verify-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password, hash }),
     });
-    const data = await response.json();
+    const data = (await response.json()) as { valid: boolean };
     return data.valid;
   }
 }
