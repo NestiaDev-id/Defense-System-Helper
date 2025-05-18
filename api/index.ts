@@ -6,7 +6,7 @@
 // export default handle(app);
 
 // Re-export the app with Vercel handler
-export const handler = async (request: Request) => {
+export const handler = async () => {
   return new Response("Hello from test handler!", { status: 200 });
 };
 
