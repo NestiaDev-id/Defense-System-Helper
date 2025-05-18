@@ -1,6 +1,6 @@
-import { app } from "../app/app";
+// import { app } from "../app/app";
 
-import { handle } from "@hono/node-server/vercel";
+// import { handle } from "@hono/node-server/vercel";
 
 // Re-export the app with Vercel handler
 // export default handle(app);
