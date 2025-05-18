@@ -1,13 +1,14 @@
 import { config } from 'dotenv';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 
-// Load environment variables from .env file
+// ESM-compatible __dirname replacement
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Load environment variables from .env file
 config({ path: join(__dirname, '../../.env') });
+
 export const env = {
   // Hono Configuration
   HONO_SECRET_KEY: process.env.HONO_SECRET_KEY || 'default-secret-key-do-not-use-in-production',
@@ -36,4 +37,4 @@ if (missingEnvVars.length > 0) {
     `Missing required environment variables: ${missingEnvVars.join(', ')}\n` +
     'Please check your .env file or environment configuration.'
   );
-} 
+}

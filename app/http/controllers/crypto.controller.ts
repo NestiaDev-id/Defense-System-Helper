@@ -70,6 +70,16 @@ export class CryptoController {
     }
   }
 
+  static async verifySign(c: Context) {
+    try {
+      const { data, signature } = await c.req.json<{ data: string; signature: string }>();
+      const result = await PythonService.checkIntegrity(data, signature);
+      return c.json<VerifySignResponse>(result);
+    } catch (error) {
+      return c.json<ErrorResponse>({ error: error instanceof Error ? error.message : "Signature verification failed" }, 500);
+    }
+  }
+
   static async encrypt(c: Context) {
     try {
       const { data, key } = await c.req.json<{ data: string; key: string }>();
