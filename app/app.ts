@@ -52,5 +52,3 @@ app.post("/data/hybrid/decrypt", CryptoController.hybridDecrypt);
 app.post("/data/sign", CryptoController.sign);
 app.post("/data/verify-sign", CryptoController.verifySign);
 app.post("/data/integrity/check", CryptoController.checkIntegrity);
-
-export default app;
