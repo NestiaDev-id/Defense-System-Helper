@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Military-grade security API with quantum-safe encryption",
   "main": "src/index.ts",
+  "type": "module",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "dev": "nodemon --exec ts-node src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
     "build": "tsc",
     "test": "jest",
     "test:unit": "jest tests/unit",
@@ -13,10 +14,11 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.8.2",
+    "@hono/swagger-ui": "^0.2.1",
+    "@scalar/hono-api-reference": "^0.8.10",
     "buffer": "^6.0.3",
     "hono": "^4.7.10",
-    "jsonwebtoken": "^9.0.2",
-    "@hono/swagger-ui": "^0.2.1"
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
@@ -27,6 +29,7 @@
     "nodemon": "^3.1.0",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.4",
     "typescript": "^5.3.3"
   },
   "directories": {

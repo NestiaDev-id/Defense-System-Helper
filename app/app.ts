@@ -1,4 +1,3 @@
-import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
@@ -49,16 +48,3 @@ app.post("/data/sign", CryptoController.sign);
 app.post("/data/verify-sign", CryptoController.verifySign);
 app.post("/data/integrity/check", CryptoController.checkIntegrity);
 
-// Start server if this file is run directly
-if (require.main === module) {
-  serve(
-    {
-      fetch: app.fetch,
-      port: 3000,
-    },
-    (info) => {
-      console.log(`Server is running on http://localhost:${info.port}`);
-      console.log("API Documentation is available at http://localhost:3000");
-    }
-  );
-}
