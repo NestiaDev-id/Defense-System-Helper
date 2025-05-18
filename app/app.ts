@@ -10,13 +10,13 @@ import { openApiDoc } from "../config/openapi";
 export const app = new Hono();
 
 // Enable CORS and Pretty JSON
-app.use("/*", cors());
-app.use("/*", prettyJSON());
+// app.use("/*", cors());
+// app.use("/*", prettyJSON());
 
-app.use("*", async (c, next) => {
-  console.log(`[Request] ${c.req.method} ${c.req.url}`);
-  await next();
-});
+// app.use("*", async (c, next) => {
+//   console.log(`[Request] ${c.req.method} ${c.req.url}`);
+//   await next();
+// });
 
 // Serve OpenAPI documentation
 app.get(
