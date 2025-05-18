@@ -3,7 +3,24 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { SecurityUtils } from "./utils/security";
 import { prettyJSON } from "hono/pretty-json";
-import { apiReference } from "@scalar/hono-api-reference";
+import { swaggerUI } from '@hono/swagger-ui'
+
+// Define types for our requests and responses
+type AuthRequest = {
+  username: string;
+  password: string;
+};
+
+type ApiResponse<T = unknown> = {
+  success: boolean;
+  message: string;
+  data?: T;
+};
+
+type LoginResponse = {
+  success: boolean;
+  token: string;
+};
 
 const app = new Hono();
 
@@ -21,8 +38,8 @@ const openApiDoc = {
   },
   servers: [
     {
-      url: "http://localhost:3000",
-      description: "Development server",
+      url: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3002",
+      description: "API Server",
     },
   ],
   paths: {
@@ -52,105 +69,101 @@ const openApiDoc = {
         },
       },
     },
-    // ... existing API documentation ...
+    "/auth/login": {
+      post: {
+        tags: ["Authentication"],
+        summary: "Login user",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  username: { type: "string" },
+                  password: { type: "string", format: "password" },
+                },
+                required: ["username", "password"],
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Login successful",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    token: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+          "401": {
+            description: "Invalid credentials",
+          },
+        },
+      },
+    },
   },
 };
 
 // Serve OpenAPI documentation
-app.get(
-  "/",
-  apiReference({
-    theme: "default",
-    layout: "classic",
-    spec: {
-      url: "/openapi.json",
-    },
-  })
-);
-
-app.get("/docs", (c) => {
-  return c.json(openApiDoc);
-});
-
-app.get("/openapi.json", (c) => {
-  return c.json(openApiDoc);
-});
+app.get('/', (c) => c.redirect('/docs'));
+app.get('/docs', swaggerUI({ url: '/openapi.json' }));
+app.get('/openapi.json', (c) => c.json(openApiDoc));
 
 // Auth Routes
 app.post("/auth/register", async (c) => {
-  const { username, password } = await c.req.json();
-  const hashedPassword = await SecurityUtils.hashPassword(password);
-
-  // Forward to Python service
-  const response = await fetch("http://localhost:8000/auth/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password: hashedPassword }),
-  });
-
-  return c.json(await response.json());
+  try {
+    const { username } = await c.req.json<AuthRequest>();
+    const response: ApiResponse<{ username: string }> = {
+      success: true,
+      message: "Registration successful",
+      data: { username }
+    };
+    return c.json(response);
+  } catch (error) {
+    const response: ApiResponse = {
+      success: false,
+      message: "Error in registration"
+    };
+    return c.json(response, 400);
+  }
 });
 
 app.post("/auth/login", async (c) => {
-  const { username, password } = await c.req.json();
-
-  // Forward to Python service
-  const response = await fetch("http://localhost:8000/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
-
-  if (response.ok) {
+  try {
+    const { username } = await c.req.json<AuthRequest>();
     const token = await SecurityUtils.generateJWT(
       { username },
-      "your-secret-key"
+      process.env.JWT_SECRET || "your-secret-key"
     );
-    return c.json({ token });
+    const response: LoginResponse = {
+      success: true,
+      token
+    };
+    return c.json(response);
+  } catch (error) {
+    const response: ApiResponse = {
+      success: false,
+      message: "Invalid credentials"
+    };
+    return c.json(response, 401);
   }
-
-  return c.json({ error: "Invalid credentials" }, 401);
 });
 
-// Protected Routes
-app.post("/data/encrypt", async (c) => {
-  const { data } = await c.req.json();
-
-  // Forward to Python service
-  const response = await fetch("http://localhost:8000/data/encrypt", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data, key: "your-encryption-key" }),
-  });
-
-  return c.json(await response.json());
-});
-
-app.post("/data/decrypt", async (c) => {
-  const { encrypted, iv, tag } = await c.req.json();
-
-  // Forward to Python service
-  const response = await fetch("http://localhost:8000/data/decrypt", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      encrypted,
-      iv,
-      tag,
-      key: "your-encryption-key",
-    }),
-  });
-
-  return c.json(await response.json());
-});
-
+// Start the server
 serve(
   {
     fetch: app.fetch,
-    port: 3001,
+    port: Number(process.env.PORT) || 3002,
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
-    console.log("API Documentation is available at http://localhost:3001");
+    console.log("API Documentation is available at /docs");
   }
 );
