@@ -10,6 +10,8 @@ import {
   VerifyPasswordResponse,
 } from "../interfaces/auth.interface";
 
+type ApiResponse = Record<string, unknown>;
+
 export class AuthController {
   static async register(c: Context) {
     const { username, password }: RegisterRequest = await c.req.json();
@@ -22,7 +24,8 @@ export class AuthController {
       body: JSON.stringify({ username, password: hashedPassword }),
     });
 
-    return c.json(await response.json());
+    const data = await response.json() as ApiResponse;
+    return c.json(data);
   }
 
   static async login(c: Context) {
@@ -99,6 +102,7 @@ export class AuthController {
       body: JSON.stringify({ refreshToken }),
     });
 
-    return c.json(await response.json());
+    const data = await response.json() as ApiResponse;
+    return c.json(data);
   }
 }
