@@ -30,7 +30,7 @@ export const env: Env = {
 
   // Python Service Configuration
   PYTHON_API_URL: process.env.PYTHON_API_URL || "http://localhost:8000",
-  PYTHON_SECRET_KEY: process.env.PYTHON_SECRET_KEY,
+  PYTHON_SECRET_KEY: process.env.PYTHON_SECRET_KEY || "default-key",
 
   // Security Configuration
   JWT_EXPIRATION: parseInt(process.env.JWT_EXPIRATION || "3600", 10),
