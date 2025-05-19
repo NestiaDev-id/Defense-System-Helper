@@ -1,6 +1,6 @@
 # Defense System Helper API
 
-A military-grade security API with quantum-safe encryption capabilities.
+Proyek ini merupakan prototipe Rest-API yang dirancang untuk mengeksplorasi penerapan algoritma kriptografi post-kuantum pada sistem keamanan modern. Fokus utama dari proyek ini adalah integrasi antara skema enkripsi klasik dan post-kuantum dalam konteks otentikasi, integritas data, dan perlindungan informasi.
 
 ## Features
 
