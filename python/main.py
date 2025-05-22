@@ -264,9 +264,9 @@ async def check_integrity(request: VerifyRequest):
 async def root():
     return {"message": "Defense System Helper Python Service is running"}
 
-@app.get("/docs")
-async def get_docs():
-    return {"message": "API documentation"}
+# @app.get("/docs")
+# async def get_docs():
+#     return {"message": "API documentation"}
 
 @app.get("/openapi.json")
 async def get_openapi():
