@@ -3,7 +3,7 @@
     "target": "ES2020",
     "module": "esnext",
     "lib": ["ES2020"],
-    "outDir": "./dist",
+    "outDir": "./dist", // Ini lebih untuk build lokal, Vercel menangani outputnya sendiri
     "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
@@ -24,6 +24,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*.ts", "api/**/*.ts", "app/**/*.ts", "config/**/*.ts"],
+  "exclude": ["node_modules", "dist", "tests", "frontend"]
 }

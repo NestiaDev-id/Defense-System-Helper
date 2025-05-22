@@ -1,16 +1,10 @@
-import { app } from "../app/app";
-
+// api/index.ts
+import { app } from "../app/app.js";
 import { handle } from "@hono/node-server/vercel";
 
-// Re-export the app with Vercel handler
 export default handle(app);
 
-// Re-export the app with Vercel handler
-// export const handler = async () => {
-//   return new Response("Hello from test handler!", { status: 200 });
-// };
-
-// For Vercel, we need to export config
+// Konfigurasi Vercel
 export const config = {
   api: {
     bodyParser: false,
