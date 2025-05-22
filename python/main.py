@@ -272,11 +272,11 @@ async def get_docs():
 async def get_openapi():
     return app.openapi()
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True if os.getenv("DEBUG", "False").lower() == "true" else False
-    ) 
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(
+#         "main:app",
+#         host="0.0.0.0",
+#         port=8000,
+#         reload=True if os.getenv("DEBUG", "False").lower() == "true" else False
+#     ) 
