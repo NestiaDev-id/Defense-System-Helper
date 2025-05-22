@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "esnext",
+    "module": "NodeNext",
     "lib": ["ES2020"],
     "outDir": "./dist", // Ini lebih untuk build lokal, Vercel menangani outputnya sendiri
     "rootDir": "./",
