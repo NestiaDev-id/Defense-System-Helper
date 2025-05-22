@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { apiReference } from "@scalar/hono-api-reference";
-import { AuthController } from "./http/controllers/auth.controller";
-import { CryptoController } from "./http/controllers/crypto.controller";
-import { authMiddleware } from "./http/middleware/auth.middleware";
-import { openApiDoc } from "../config/openapi";
+import { AuthController } from "./http/controllers/auth.controller.js";
+import { CryptoController } from "./http/controllers/crypto.controller.js";
+import { authMiddleware } from "./http/middleware/auth.middleware.js";
+import { openApiDoc } from "../config/openapi.js";
 
 export const app = new Hono();
 

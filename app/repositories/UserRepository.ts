@@ -1,4 +1,4 @@
-import { User, UserSession } from '../models/User';
+import { User, UserSession } from "../models/User.js";
 
 export class UserRepository {
   private static users: Map<string, User> = new Map();
@@ -32,4 +32,4 @@ export class UserRepository {
   static async findSessionByToken(token: string): Promise<UserSession | null> {
     return this.sessions.get(token) || null;
   }
-} 
+}

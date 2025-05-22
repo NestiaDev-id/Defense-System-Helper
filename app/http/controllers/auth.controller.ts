@@ -1,5 +1,5 @@
 import { Context } from "hono";
-import { SecurityService } from "../../services/security.service";
+import { SecurityService } from "../../services/security.service.js";
 import {
   LoginRequest,
   RegisterRequest,
@@ -8,7 +8,7 @@ import {
   HashPasswordRequest,
   VerifyPasswordRequest,
   VerifyPasswordResponse,
-} from "../interfaces/auth.interface";
+} from "../interfaces/auth.interface.js";
 
 type ApiResponse = Record<string, unknown>;
 
@@ -24,7 +24,7 @@ export class AuthController {
       body: JSON.stringify({ username, password: hashedPassword }),
     });
 
-    const data = await response.json() as ApiResponse;
+    const data = (await response.json()) as ApiResponse;
     return c.json(data);
   }
 
@@ -102,7 +102,7 @@ export class AuthController {
       body: JSON.stringify({ refreshToken }),
     });
 
-    const data = await response.json() as ApiResponse;
+    const data = (await response.json()) as ApiResponse;
     return c.json(data);
   }
 }

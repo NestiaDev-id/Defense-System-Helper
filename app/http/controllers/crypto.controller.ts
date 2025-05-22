@@ -8,8 +8,8 @@ import {
   VerifySignResponse,
   IntegrityCheckResponse,
   DecryptRequest,
-} from "../interfaces/crypto.interface";
-import { PythonService } from "../../services/PythonService";
+} from "../interfaces/crypto.interface.js";
+import { PythonService } from "../../services/PythonService.js";
 
 type ErrorResponse = {
   error: string;

@@ -1,12 +1,10 @@
-import { UserRepository } from '../repositories/UserRepository';
-
 export class SessionCleanupJob {
   static async execute(): Promise<void> {
     try {
       // In a real application, this would clean up expired sessions from the database
-      console.log('Cleaning up expired sessions...');
+      console.log("Cleaning up expired sessions...");
     } catch (error) {
-      console.error('Error cleaning up sessions:', error);
+      console.error("Error cleaning up sessions:", error);
     }
   }
 
@@ -16,4 +14,4 @@ export class SessionCleanupJob {
       this.execute();
     }, 60 * 60 * 1000);
   }
-} 
+}
