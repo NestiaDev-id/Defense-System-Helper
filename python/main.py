@@ -260,8 +260,14 @@ async def check_integrity(request: VerifyRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 # Documentation Routes
+# @app.get("/")
+# async def root():
+#     return {"message": "Defense System Helper Python Service is running"}
+
 @app.get("/")
 async def root():
+    print("Python root endpoint was hit!") # Tambahkan log ini
+    print(f"CORS_ORIGIN env var: {os.getenv('CORS_ORIGIN')}") # Contoh cek env var
     return {"message": "Defense System Helper Python Service is running"}
 
 # @app.get("/docs")
