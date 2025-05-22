@@ -17,9 +17,9 @@ import jwt
 from datetime import datetime, timedelta
 
 # Import services
-from app.services.auth_service import AuthService
-from app.services.crypto_service import CryptoService
-from app.services.integrity_service import IntegrityService
+from python.app.services.auth_service import AuthService
+from python.app.services.crypto_service import CryptoService
+from python.app.services.integrity_service import IntegrityService
 
 # Load environment variables
 load_dotenv()
