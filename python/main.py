@@ -27,7 +27,8 @@ load_dotenv()
 app = FastAPI(
     title="Defense System Helper - Python Backend",
     description="Quantum-Safe Security Implementation",
-    version="1.0.0"
+    version="1.0.0",
+    root_path="/py"
 )
 
 # Security configuration
