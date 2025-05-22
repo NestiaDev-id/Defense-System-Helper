@@ -1,6 +1,4 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { prettyJSON } from "hono/pretty-json";
 import { apiReference } from "@scalar/hono-api-reference";
 import { AuthController } from "./http/controllers/auth.controller";
 import { CryptoController } from "./http/controllers/crypto.controller";
