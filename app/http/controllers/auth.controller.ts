@@ -16,6 +16,7 @@ export class AuthController {
   static async register(c: Context) {
     const { username, password }: RegisterRequest = await c.req.json();
     const hashedPassword = await SecurityService.hashPassword(password);
+    console.log(hashedPassword);
 
     // Forward to Python service for storage
     const response = await fetch("http://localhost:8000/auth/register", {

@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 export class SecurityService {
   private static readonly ALGORITHM = "aes-256-gcm";
   private static readonly JWT_SECRET =
-    process.env.JWT_SECRET || "your-secret-key";
+    process.env.JWT_SECRET_KEY || "your-secret-key";
   private static readonly JWT_EXPIRY = "1h";
 
   static async generateJWT(
