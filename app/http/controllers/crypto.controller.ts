@@ -10,6 +10,7 @@ import {
   DecryptRequest,
 } from "../interfaces/crypto.interface.js";
 import { PythonService } from "../../services/PythonService.js";
+import { env } from "../../config/env.js";
 
 type ErrorResponse = {
   error: string;
@@ -30,7 +31,7 @@ function isKeyPair(obj: unknown): obj is KeyPair {
 export class CryptoController {
   static async generateKemKeyPair(c: Context) {
     try {
-      const response = await fetch("http://localhost:8000/crypto/key/kem", {
+      const response = await fetch(`${env.PYTHON_API_URL}/crypto/key/kem`, {
         method: "POST",
       });
       if (!response.ok) {
@@ -59,7 +60,7 @@ export class CryptoController {
 
   static async generateSignKeyPair(c: Context) {
     try {
-      const response = await fetch("http://localhost:8000/crypto/key/sign", {
+      const response = await fetch(`${env.PYTHON_API_URL}/crypto/key/sign`, {
         method: "POST",
       });
       if (!response.ok) {
@@ -159,7 +160,7 @@ export class CryptoController {
       }
 
       const response = await fetch(
-        "http://localhost:8000/data/hybrid/encrypt",
+        `${env.PYTHON_API_URL}/data/hybrid/encrypt`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -203,7 +204,7 @@ export class CryptoController {
       }
 
       const response = await fetch(
-        "http://localhost:8000/data/hybrid/decrypt",
+        `${env.PYTHON_API_URL}/data/hybrid/decrypt`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -287,7 +288,7 @@ export class CryptoController {
       }
 
       const response = await fetch(
-        "http://localhost:8000/data/integrity/check",
+        `${env.PYTHON_API_URL}/data/integrity/check`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

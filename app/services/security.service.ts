@@ -1,6 +1,7 @@
 import { Buffer } from "buffer";
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import jwt from "jsonwebtoken";
+import { env } from "../config/env.js";
 
 export class SecurityService {
   private static readonly ALGORITHM = "aes-256-gcm";
@@ -59,7 +60,7 @@ export class SecurityService {
   }
 
   static async hashPassword(password: string, options = {}): Promise<string> {
-    const response = await fetch("http://localhost:8000/auth/hash-password", {
+    const response = await fetch(`${env.PYTHON_API_URL}/auth/hash-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password, ...options }),
@@ -72,7 +73,7 @@ export class SecurityService {
     password: string,
     hash: string
   ): Promise<boolean> {
-    const response = await fetch("http://localhost:8000/auth/verify-password", {
+    const response = await fetch(`${env.PYTHON_API_URL}/auth/verify-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password, hash }),

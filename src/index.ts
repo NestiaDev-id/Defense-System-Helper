@@ -1,5 +1,5 @@
 import { serve } from "@hono/node-server";
-import { app } from "../app/app"; // pastikan path sesuai
+import { app } from "../app/app.js"; // pastikan path sesuai
 
 serve(
   {

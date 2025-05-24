@@ -9,6 +9,7 @@ import {
   VerifyPasswordRequest,
   VerifyPasswordResponse,
 } from "../interfaces/auth.interface.js";
+import { env } from "../../config/env.js";
 
 type ApiResponse = Record<string, unknown>;
 
@@ -19,7 +20,7 @@ export class AuthController {
     console.log(hashedPassword);
 
     // Forward to Python service for storage
-    const response = await fetch("http://localhost:8000/auth/register", {
+    const response = await fetch(`${env.PYTHON_API_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password: hashedPassword }),
@@ -33,7 +34,7 @@ export class AuthController {
     const { username, password }: LoginRequest = await c.req.json();
 
     // Forward to Python service for verification
-    const response = await fetch("http://localhost:8000/auth/login", {
+    const response = await fetch(`${env.PYTHON_API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -97,7 +98,7 @@ export class AuthController {
     const { refreshToken }: RefreshTokenRequest = await c.req.json();
 
     // Forward to Python service for verification
-    const response = await fetch("http://localhost:8000/auth/refresh-token", {
+    const response = await fetch(`${env.PYTHON_API_URL}/auth/refresh-token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
