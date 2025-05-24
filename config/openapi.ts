@@ -10,6 +10,10 @@ export const openApiDoc = {
       url: "http://localhost:3000",
       description: "Development server",
     },
+    {
+      url: "https://defense-system-helper.vercel.app/api/v1",
+      description: "Production server",
+    },
   ],
   paths: {
     "/auth/register": {
