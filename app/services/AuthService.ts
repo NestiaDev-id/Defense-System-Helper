@@ -5,39 +5,50 @@ import {
   ValidationError,
 } from "../exceptions/AppError.js";
 import { SecurityUtils } from "../utils/SecurityUtils.js";
+import { SecurityService } from "./security.service.js";
 
 export class AuthService {
-  static async register(username: string, password: string): Promise<User> {
+  static async register(
+    username: string,
+    hashedPasswordFromPython: string
+  ): Promise<User> {
+    // Terima hashedPassword
     const existingUser = await UserRepository.findByUsername(username);
     if (existingUser) {
       throw new ValidationError("Username already exists");
     }
 
-    const hashedPassword = await SecurityUtils.hashPassword(password);
     return UserRepository.create({
       username,
-      password: hashedPassword,
+      password: hashedPasswordFromPython, // Simpan hash yang sudah dibuat Python
     });
   }
 
   static async login(username: string, password: string): Promise<string> {
     const user = await UserRepository.findByUsername(username);
     if (!user) {
-      throw new AuthenticationError("Invalid credentials");
+      throw new AuthenticationError("Invalid credentials"); // Ganti dengan AuthenticationError jika ada
     }
 
-    const isValid = await SecurityUtils.verifyPassword(password, user.password);
+    // Verifikasi password bisa tetap memanggil Python jika Anda mau
+    // atau lakukan di Node.js jika library bcrypt/argon2 ada di Node.js
+    const isValid = await SecurityService.verifyPassword(
+      password,
+      user.password
+    ); // SecurityService.ts
     if (!isValid) {
       throw new AuthenticationError("Invalid credentials");
     }
 
-    const token = await SecurityUtils.generateJWT({ userId: user.id! });
-    await UserRepository.createSession({
+    const token = await SecurityUtils.generateJWT({
       userId: user.id!,
-      token,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-    });
-
+      username: user.username,
+    }); // SecurityUtils.ts
+    // await UserRepository.createSession({
+    //   userId: user.id!,
+    //   token,
+    //   expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    // });
     return token;
   }
 

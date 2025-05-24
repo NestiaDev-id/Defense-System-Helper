@@ -8,44 +8,130 @@ import {
   HashPasswordRequest,
   VerifyPasswordRequest,
   VerifyPasswordResponse,
+  PythonErrorResponse,
+  PythonHashPasswordResponse,
+  PythonLoginSuccessResponse,
 } from "../interfaces/auth.interface.js";
 import { env } from "../../config/env.js";
+import { AuthService } from "../../services/AuthService.js";
 
 type ApiResponse = Record<string, unknown>;
 
 export class AuthController {
   static async register(c: Context) {
-    const { username, password }: RegisterRequest = await c.req.json();
-    const hashedPassword = await SecurityService.hashPassword(password);
-    console.log(hashedPassword);
+    const { username, password }: RegisterRequest = await c.req.json(); // 1. Dapat request
 
-    // Forward to Python service for storage
-    const response = await fetch(`${env.PYTHON_API_URL}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password: hashedPassword }),
-    });
+    try {
+      // 3. Minta tolong Python buatkan "kunci" (hash password)
+      const hashResponse = await fetch(
+        `${env.PYTHON_API_URL}/auth/hash-password`,
+        {
+          // Panggil endpoint hashing Python
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": env.PYTHON_SECRET_KEY,
+          },
+          body: JSON.stringify({ password }), // Kirim password asli untuk di-hash Python
+        }
+      );
 
-    const data = (await response.json()) as ApiResponse;
-    return c.json(data);
+      const hashResponseBody = await hashResponse.json();
+
+      if (!hashResponse.ok) {
+        const errorDetail =
+          (hashResponseBody as PythonErrorResponse)?.detail ||
+          "Python password hashing failed";
+        console.error("Python password hashing error:", errorDetail);
+        return c.json({
+          error:
+            typeof errorDetail === "string"
+              ? errorDetail
+              : JSON.stringify(errorDetail),
+        });
+      }
+
+      const { hash: hashedPassword } =
+        hashResponseBody as PythonHashPasswordResponse; // 4. Terima "kunci" (hashedPassword) dari Python
+
+      if (!hashedPassword) {
+        return c.json(
+          { error: "Failed to get hashed password from Python service" },
+          500
+        );
+      }
+
+      // 5. Jika semua kunci sudah siap (username & hashedPassword), simpan ke database
+      // Ini menggunakan AuthService dari Node.js Anda, yang akan berinteraksi dengan UserRepository.ts,
+      // dan UserRepository.ts idealnya akan menyimpan ke database persisten (Supabase, MongoDB, dll.)
+      // bukan lagi Map di memori.
+      const newUser = await AuthService.register(username, hashedPassword); // AuthService.ts Node.js Anda
+      // perlu dimodifikasi agar menerima hashedPassword
+      // dan tidak melakukan hashing lagi.
+
+      return c.json({
+        message: "User registered successfully",
+        userId: newUser.id,
+      });
+    } catch (error: any) {
+      console.error("Registration process error:", error);
+      // Tangani error spesifik dari AuthService.register (misalnya, username sudah ada)
+      if (error.message && error.message.includes("Username already exists")) {
+        return c.json({ error: error.message }, 409); // 409 Conflict
+      }
+      return c.json({ error: error.message || "Registration failed" }, 500);
+    }
   }
 
   static async login(c: Context) {
     const { username, password }: LoginRequest = await c.req.json();
 
-    // Forward to Python service for verification
-    const response = await fetch(`${env.PYTHON_API_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const pythonLoginResponse = await fetch(
+        `${env.PYTHON_API_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": env.PYTHON_SECRET_KEY,
+          },
+          body: JSON.stringify({ username, password }),
+        }
+      );
 
-    if (response.ok) {
-      const token = await SecurityService.generateJWT({ username });
+      const responseBody = await pythonLoginResponse.json();
+
+      if (!pythonLoginResponse.ok) {
+        const errorDetail =
+          (responseBody as PythonErrorResponse)?.detail ||
+          "Invalid credentials from Python";
+        console.error("Python login error:", errorDetail);
+        return c.json(
+          {
+            error:
+              typeof errorDetail === "string"
+                ? errorDetail
+                : JSON.stringify(errorDetail),
+          },
+          401
+        );
+      }
+
+      // Dapatkan username dari respons Python jika login Python berhasil
+      const pythonData = responseBody as PythonLoginSuccessResponse;
+
+      // Hono generate tokennya sendiri
+      const token = await SecurityService.generateJWT({
+        username: pythonData.username || username,
+      });
       return c.json<TokenResponse>({ token });
+    } catch (error: any) {
+      console.error("Login fetch/parse error:", error);
+      return c.json(
+        { error: error.message || "Login failed due to an unexpected error" },
+        500
+      );
     }
-
-    return c.json({ error: "Invalid credentials" }, 401);
   }
 
   static async hashPassword(c: Context) {

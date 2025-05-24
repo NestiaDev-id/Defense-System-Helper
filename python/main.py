@@ -261,15 +261,9 @@ async def check_integrity(request: VerifyRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 # Documentation Routes
-# @app.get("/")
-# async def root():
-#     return {"message": "Defense System Helper Python Service is running"}
-
 @app.get("/")
 async def root():
-    print("Python root endpoint was hit!") # Tambahkan log ini
-    print(f"CORS_ORIGIN env var: {os.getenv('CORS_ORIGIN')}") # Contoh cek env var
-    return {"message": "Defense System Helper Python Service is running"}
+    return {"message": "Defense System Helper Service is running"}
 
 @app.get("/docs")
 async def get_docs():
@@ -278,12 +272,3 @@ async def get_docs():
 @app.get("/openapi.json")
 async def get_openapi():
     return app.openapi()
-
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(
-#         "main:app",
-#         host="0.0.0.0",
-#         port=8000,
-#         reload=True if os.getenv("DEBUG", "False").lower() == "true" else False
-#     ) 
