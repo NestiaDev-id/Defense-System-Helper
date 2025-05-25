@@ -103,9 +103,9 @@ export class AuthController {
     if (!usernameValidation.isValid) {
       return c.json({ error: usernameValidation.message }, 400);
     }
-    if (!password) {
-      // Validasi password sederhana untuk login (hanya cek keberadaan)
-      return c.json({ error: "Password is required" }, 400);
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return c.json({ error: passwordValidation.message }, 400);
     }
 
     try {
