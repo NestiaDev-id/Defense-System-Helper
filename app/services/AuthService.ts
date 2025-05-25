@@ -1,4 +1,4 @@
-import { User } from "../models/User.js";
+import { ComplexPasswordData, User } from "../models/User.js";
 import { UserRepository } from "../repositories/UserRepository.js";
 import {
   AuthenticationError,
@@ -44,6 +44,7 @@ export class AuthService {
       userId: user.id!,
       username: user.username,
     }); // SecurityUtils.ts
+
     // await UserRepository.createSession({
     //   userId: user.id!,
     //   token,
@@ -64,5 +65,18 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  static async registerComplex(
+    username: string,
+    passwordData: ComplexPasswordData // Menerima objek dengan semua data terenkripsi/hash
+  ): Promise<User> {
+    const existingUser = await UserRepository.findByUsername(username);
+    if (existingUser) {
+      throw new ValidationError("Username already exists");
+    }
+
+    // Panggil metode UserRepository yang sesuai
+    return UserRepository.createComplexUser(username, passwordData);
   }
 }

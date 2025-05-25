@@ -9,12 +9,16 @@ import {
   VerifyPasswordRequest,
   VerifyPasswordResponse,
   PythonErrorResponse,
-  PythonHashPasswordResponse,
   PythonLoginSuccessResponse,
+  PythonHmacResponse,
+  PythonAesEncryptResponse,
+  PythonArgon2idResponse,
 } from "../interfaces/auth.interface.js";
 import { env } from "../../config/env.js";
 import { AuthService } from "../../services/AuthService.js";
 import { validatePassword, validateUsername } from "../../utils/validators.js";
+import { Buffer } from "buffer";
+import { randomBytes } from "crypto";
 
 type ApiResponse = Record<string, unknown>;
 
@@ -34,63 +38,90 @@ export class AuthController {
     }
 
     try {
-      // 3. Minta tolong Python buatkan "kunci" (hash password)
-      const hashResponse = await fetch(
-        `${env.PYTHON_API_URL}/auth/hash-password`,
+      // 1. & 2. Dapatkan Argon2id Hash dan Salt-nya dari Python
+      const argonResponse = await fetch(
+        `${env.PYTHON_API_URL}/auth/argon2id-hash`,
         {
-          // Panggil endpoint hashing Python
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "X-API-Key": env.PYTHON_SECRET_KEY,
           },
-          body: JSON.stringify({ password }), // Kirim password asli untuk di-hash Python
+          body: JSON.stringify({ password }),
         }
       );
+      if (!argonResponse.ok)
+        throw new Error("Failed to get Argon2id hash from Python");
+      const { hashed_password, salt_argon } =
+        (await argonResponse.json()) as PythonArgon2idResponse;
 
-      const hashResponseBody = await hashResponse.json();
+      // 3. Hasilkan IV untuk AES di Hono
+      const iv_aes_bytes = randomBytes(16); // crypto dari Node.js
+      const iv_aes_b64 = iv_aes_bytes.toString("base64");
 
-      if (!hashResponse.ok) {
-        const errorDetail =
-          (hashResponseBody as PythonErrorResponse)?.detail ||
-          "Python password hashing failed";
-        console.error("Python password hashing error:", errorDetail);
-        return c.json({
-          error:
-            typeof errorDetail === "string"
-              ? errorDetail
-              : JSON.stringify(errorDetail),
-        });
-      }
+      // Minta Python untuk mengenkripsi password menggunakan AES
+      // Mengirim password asli, salt_argon (untuk KDF kunci AES), dan iv_aes
+      const aesEncryptResponse = await fetch(
+        `${env.PYTHON_API_URL}/data/aes-encrypt-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": env.PYTHON_SECRET_KEY,
+          },
+          body: JSON.stringify({
+            password: password,
+            salt_for_kdf: salt_argon, // Salt Argon2id digunakan lagi untuk KDF kunci AES
+            iv_b64: iv_aes_b64,
+          }),
+        }
+      );
+      if (!aesEncryptResponse.ok)
+        throw new Error("Failed to encrypt password with AES via Python");
+      const { cipherdata } =
+        (await aesEncryptResponse.json()) as PythonAesEncryptResponse; // cipherdata sudah base64 dari Python
 
-      const { hash: hashedPassword } =
-        hashResponseBody as PythonHashPasswordResponse; // 4. Terima "kunci" (hashedPassword) dari Python
+      // 4. Minta Python untuk menghasilkan Combined Hash (HMAC)
+      const hmacResponse = await fetch(
+        `${env.PYTHON_API_URL}/integrity/generate-hmac`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": env.PYTHON_SECRET_KEY,
+          },
+          body: JSON.stringify({
+            data_to_hmac: cipherdata, // cipherdata (base64)
+            hmac_key_material: hashed_password, // $hashed_password (output Argon2id) sebagai kunci HMAC
+          }),
+        }
+      );
+      if (!hmacResponse.ok)
+        throw new Error("Failed to generate HMAC via Python");
+      const { combined_hash } =
+        (await hmacResponse.json()) as PythonHmacResponse; // combined_hash (misalnya hex)
 
-      if (!hashedPassword) {
-        return c.json(
-          { error: "Failed to get hashed password from Python service" },
-          500
-        );
-      }
+      // 5. Encode Combined Hash ke Base64 (jika belum)
+      // Asumsi combined_hash dari Python adalah hex, kita ubah ke base64 untuk konsistensi penyimpanan
+      const encoded_combined_hash = Buffer.from(combined_hash, "hex").toString(
+        "base64"
+      );
 
-      // 5. Jika semua kunci sudah siap (username & hashedPassword), simpan ke database
-      // Ini menggunakan AuthService dari Node.js Anda, yang akan berinteraksi dengan UserRepository.ts,
-      // dan UserRepository.ts idealnya akan menyimpan ke database persisten (Supabase, MongoDB, dll.)
-      // bukan lagi Map di memori.
-      const newUser = await AuthService.register(username, hashedPassword); // AuthService.ts Node.js Anda
-      // perlu dimodifikasi agar menerima hashedPassword
-      // dan tidak melakukan hashing lagi.
+      // 6. Simpan ke Database (melalui AuthService Node.js dan UserRepository Node.js)
+      // Anda perlu memodifikasi User model dan UserRepository untuk menyimpan semua field ini.
+      await AuthService.registerComplex(username, {
+        argon2id_hash: hashed_password,
+        encoded_combined_hmac: encoded_combined_hash,
+        aes_cipherdata_b64: cipherdata,
+        argon_salt_b64: Buffer.from(salt_argon, "hex").toString("base64"), // Jika salt_argon adalah hex dari Python
+        aes_iv_b64: iv_aes_b64,
+      });
 
       return c.json({
-        message: "User registered successfully",
-        userId: newUser.id,
+        message: "User registered successfully with complex password storage.",
       });
     } catch (error: any) {
-      console.error("Registration process error:", error);
-      // Tangani error spesifik dari AuthService.register (misalnya, username sudah ada)
-      if (error.message && error.message.includes("Username already exists")) {
-        return c.json({ error: error.message }, 409); // 409 Conflict
-      }
+      console.error("Complex registration error:", error);
       return c.json({ error: error.message || "Registration failed" }, 500);
     }
   }
