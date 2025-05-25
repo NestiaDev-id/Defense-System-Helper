@@ -14,12 +14,24 @@ import {
 } from "../interfaces/auth.interface.js";
 import { env } from "../../config/env.js";
 import { AuthService } from "../../services/AuthService.js";
+import { validatePassword, validateUsername } from "../../utils/validators.js";
 
 type ApiResponse = Record<string, unknown>;
 
 export class AuthController {
   static async register(c: Context) {
     const { username, password }: RegisterRequest = await c.req.json(); // 1. Dapat request
+
+    // 1. Validasi Input dari Klien
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.isValid) {
+      return c.json({ error: usernameValidation.message }, 400);
+    }
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return c.json({ error: passwordValidation.message }, 400);
+    }
 
     try {
       // 3. Minta tolong Python buatkan "kunci" (hash password)
@@ -85,6 +97,16 @@ export class AuthController {
 
   static async login(c: Context) {
     const { username, password }: LoginRequest = await c.req.json();
+
+    // 1. Validasi Input dari Klien (Username & Password)
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.isValid) {
+      return c.json({ error: usernameValidation.message }, 400);
+    }
+    if (!password) {
+      // Validasi password sederhana untuk login (hanya cek keberadaan)
+      return c.json({ error: "Password is required" }, 400);
+    }
 
     try {
       const pythonLoginResponse = await fetch(
