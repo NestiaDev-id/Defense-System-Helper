@@ -61,3 +61,16 @@ export interface PythonVerifyPasswordResponse {
 export interface PythonRefreshTokenSuccessResponse {
   access_token: string;
 }
+
+export interface PythonArgon2idResponse {
+  hashed_password: string;
+  salt_argon: string; // Salt yang digunakan Argon2id, dalam format hex/base64
+}
+
+export interface PythonAesEncryptResponse {
+  cipherdata: string; // Base64 encoded ciphertext
+}
+
+export interface PythonHmacResponse {
+  combined_hash: string; // Hex atau Base64 encoded HMAC
+}

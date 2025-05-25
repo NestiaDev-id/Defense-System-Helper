@@ -164,11 +164,9 @@ export class AuthController {
       parallelism = 1,
     }: HashPasswordRequest = await c.req.json();
 
-    if (!password || typeof password !== "string") {
-      return c.json(
-        { error: "Password is required and must be a string" },
-        400
-      );
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return c.json({ error: passwordValidation.message }, 400);
     }
 
     // Limit protection
