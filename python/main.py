@@ -335,6 +335,20 @@ async def create_argon2id_hash(
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
+@app.post("auth/argon2id-verify", response_model=VerifyPasswordResponse)
+async def verify_argon2id_password(
+    request: VerifyPasswordRequest, api_key: str = Depends(get_api_key)
+):
+    try:
+        ph = PasswordHasher()
+        valid = ph.verify(request.hash, request.password)
+        return VerifyPasswordResponse(valid=valid)
+    except argon2_exceptions.VerifyMismatchError:
+        return VerifyPasswordResponse(valid=False)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+
 @app.post("/data/verify-sign", response_model=VerifyResponse)
 async def verify_sign(request: VerifyRequest):
     try:
@@ -365,7 +379,7 @@ async def aes_encrypt_password_endpoint(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/integrity/generate-hmac", response_model=GenerateHmacResponse)
+@app.post("/data/integrity/generate-hmac", response_model=GenerateHmacResponse)
 async def generate_hmac_endpoint(
     request: GenerateHmacRequest, api_key: str = Depends(get_api_key)
 ):

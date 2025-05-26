@@ -67,4 +67,26 @@ export class PythonService {
   static async generateSignature(data: string, key: string) {
     return this.makeRequest("/integrity/sign", "POST", { data, key });
   }
+
+  static async getArgon2idHash(password: string) {
+    // Gunakan tipe yang sesuai
+    return this.makeRequest("/auth/argon2id-hash", "POST", {
+      password,
+    });
+  }
+
+  static async aesEncryptPassword(payload: {
+    password: string;
+    salt_for_kdf: string;
+    iv_b64: string;
+  }) {
+    return this.makeRequest("/data/aes-encrypt-password", "POST", payload);
+  }
+
+  static async generateHmac(payload: {
+    data_to_hmac_b64: string;
+    hmac_key_material: string;
+  }) {
+    return this.makeRequest("/integrity/generate-hmac", "POST", payload);
+  }
 }

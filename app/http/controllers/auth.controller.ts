@@ -13,6 +13,7 @@ import {
   PythonHmacResponse,
   PythonAesEncryptResponse,
   PythonArgon2idResponse,
+  Argon2idHashRequest,
 } from "../interfaces/auth.interface.js";
 import { env } from "../../config/env.js";
 import { AuthService } from "../../services/AuthService.js";
@@ -243,5 +244,46 @@ export class AuthController {
 
     const data = (await response.json()) as ApiResponse;
     return c.json(data);
+  }
+
+  static async argon2idHash(c: Context) {
+    try {
+      const { password } = await c.req.json<Argon2idHashRequest>();
+      if (!password) {
+        return c.json(
+          { error: "Password is required for Argon2id hashing" },
+          400
+        );
+      }
+
+      // Panggil PythonService untuk endpoint hashing Argon2id
+      // Anda mungkin perlu menambahkan metode baru di PythonService.ts
+      // seperti `getArgon2idHash(password: string)`
+
+      const response = await fetch(`${env.PYTHON_API_URL}/auth/argon2id-hash`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      return c.json(response);
+    } catch (error: any) {
+      console.error("Argon2id hash error in AuthController:", error);
+      if (error.response && error.response.data) {
+        // Jika error dari fetch di PythonService
+        return c.json(
+          {
+            error:
+              (error.response.data as PythonErrorResponse).detail ||
+              "Failed to hash password with Argon2id",
+          },
+          error.response.status || 500
+        );
+      }
+      return c.json(
+        { error: error.message || "Failed to hash password with Argon2id" },
+        500
+      );
+    }
   }
 }

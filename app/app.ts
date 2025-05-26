@@ -37,6 +37,7 @@ app.post("/auth/login", AuthController.login);
 app.post("/auth/hash-password", AuthController.hashPassword);
 app.post("/auth/verify-password", AuthController.verifyPassword);
 app.post("/auth/refresh-token", AuthController.refreshToken);
+app.post("/auth/argon2id-hash", AuthController.argon2idHash);
 
 // Protected Routes
 app.post("/data/encrypt", authMiddleware, CryptoController.encrypt);
@@ -50,3 +51,6 @@ app.post("/data/hybrid/decrypt", CryptoController.hybridDecrypt);
 app.post("/data/sign", CryptoController.sign);
 app.post("/data/verify-sign", CryptoController.verifySign);
 app.post("/data/integrity/check", CryptoController.checkIntegrity);
+
+app.post("/data/aes-encrypt-password", CryptoController.aesEncryptPassword);
+app.post("/integrity/generate-hmac", CryptoController.generateHmac);
