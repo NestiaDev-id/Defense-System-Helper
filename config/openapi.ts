@@ -461,6 +461,41 @@ export const openApiDoc = {
         },
       },
     },
+    "/data/integrity/generate-hmac": {
+      post: {
+        tags: ["Integrity"],
+        summary: "Generate HMAC for data integrity",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  original: { type: "string" },
+                },
+                required: ["original"],
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "HMAC generation result",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    hmac: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     "/data/integrity/check": {
       post: {
         tags: ["Integrity"],
