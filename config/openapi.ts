@@ -14,6 +14,10 @@ export const openApiDoc = {
       url: "http://localhost:3000",
       description: "Development server",
     },
+    {
+      url: "http://localhost:8000/api/v1",
+      description: "Development server",
+    },
   ],
   paths: {
     "/auth/register": {

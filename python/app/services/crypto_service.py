@@ -2,7 +2,7 @@ import os
 import secrets
 import hashlib
 import base64
-import pqcrypto
+from pqcrypto.pqclean import crypto_kem as kyber_kem
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import hashes
