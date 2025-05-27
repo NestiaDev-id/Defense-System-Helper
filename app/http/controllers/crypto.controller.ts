@@ -8,6 +8,8 @@ import {
   VerifySignResponse,
   IntegrityCheckResponse,
   DecryptRequest,
+  GenerateHmacRequest,
+  AesEncryptPasswordRequest,
 } from "../interfaces/crypto.interface.js";
 import { PythonService } from "../../services/PythonService.js";
 import { env } from "../../config/env.js";
@@ -307,6 +309,85 @@ export class CryptoController {
         {
           error:
             error instanceof Error ? error.message : "Integrity check failed",
+        },
+        500
+      );
+    }
+  }
+
+  static async aesEncryptPassword(c: Context) {
+    try {
+      const body = await c.req.json<AesEncryptPasswordRequest>();
+      // Tambahkan validasi untuk body jika perlu
+
+      // Panggil PythonService untuk endpoint enkripsi AES password
+      // Anda mungkin perlu menambahkan metode baru di PythonService.ts
+
+      const response = await fetch(
+        `${env.PYTHON_API_URL}/data/aes-encrypt-password`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
+
+      return c.json(response);
+    } catch (error: any) {
+      console.error("AES encrypt password error in CryptoController:", error);
+      if (error.response && error.response.data) {
+        return c.json(
+          {
+            error:
+              (error.response.data as { detail?: string }).detail ||
+              "AES encryption failed",
+          },
+          error.response.status || 500
+        );
+      }
+      return c.json<ErrorResponse>(
+        {
+          error:
+            error instanceof Error ? error.message : "AES encryption failed",
+        },
+        500
+      );
+    }
+  }
+
+  static async generateHmac(c: Context) {
+    try {
+      const body = await c.req.json<GenerateHmacRequest>();
+      // Tambahkan validasi untuk body jika perlu
+
+      // Panggil PythonService untuk endpoint generate HMAC
+      // Anda mungkin perlu menambahkan metode baru di PythonService.ts
+      const response = await fetch(
+        `${env.PYTHON_API_URL}/integrity/generate-hmac`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
+
+      return c.json(response);
+    } catch (error: any) {
+      console.error("Generate HMAC error in CryptoController:", error);
+      if (error.response && error.response.data) {
+        return c.json(
+          {
+            error:
+              (error.response.data as { detail?: string }).detail ||
+              "HMAC generation failed",
+          },
+          error.response.status || 500
+        );
+      }
+      return c.json<ErrorResponse>(
+        {
+          error:
+            error instanceof Error ? error.message : "HMAC generation failed",
         },
         500
       );

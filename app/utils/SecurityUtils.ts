@@ -18,12 +18,15 @@ export class SecurityUtils {
   }
 
   static async generateJWT(payload: object): Promise<string> {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: "24h" });
+    return jwt.sign(payload, JWT_SECRET, {
+      expiresIn: "30m",
+      algorithm: "HS512",
+    });
   }
 
   static async verifyJWT(token: string): Promise<any> {
     try {
-      return jwt.verify(token, JWT_SECRET);
+      return jwt.verify(token, JWT_SECRET, { algorithms: ["HS512"] });
     } catch (error) {
       return null;
     }

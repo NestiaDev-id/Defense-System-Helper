@@ -57,7 +57,48 @@ export interface PythonHashPasswordResponse {
 export interface PythonVerifyPasswordResponse {
   valid: boolean;
 }
+export interface PythonAesDecryptResponse {
+  decrypted_data: string; // Atau nama field yang sesuai dari Python
+}
+export interface PythonVerifyHmacResponse {
+  valid: boolean;
+}
 
 export interface PythonRefreshTokenSuccessResponse {
   access_token: string;
+}
+
+export interface PythonArgon2idResponse {
+  hashed_password: string;
+  salt_argon: string; // Salt yang digunakan Argon2id, dalam format hex/base64
+}
+
+export interface PythonAesEncryptResponse {
+  cipherdata: string; // Base64 encoded ciphertext
+}
+
+export interface PythonHmacResponse {
+  combined_hash: string; // Hex atau Base64 encoded HMAC
+}
+
+export interface PythonAesEncryptPasswordResponse {
+  encrypted_password: string; // Base64 encoded encrypted password
+  iv_b64: string; // Base64 encoded IV
+  salt_for_kdf: string; // Base64 encoded salt for KDF
+}
+
+export interface Argon2idHashRequest {
+  password: string;
+  // tambahkan opsi lain jika ada, seperti salt, timeCost, dll.
+}
+
+export interface PythonArgon2idHashResponse {
+  // Sesuaikan dengan respons aktual Python
+  hashed_password: string;
+  salt_argon_hex: string; // atau format lain salt yang dikembalikan Python
+}
+
+// Tambahkan juga tipe untuk PythonErrorResponse jika belum ada secara global
+export interface PythonErrorResponse {
+  detail: string | any;
 }

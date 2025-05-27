@@ -54,3 +54,22 @@ export interface IntegrityCheckRequest {
 export interface IntegrityCheckResponse {
   valid: boolean;
 }
+
+export interface AesEncryptPasswordRequest {
+  password: string;
+  salt_for_kdf: string;
+  iv_b64: string;
+}
+export interface PythonAesEncryptPasswordResponse {
+  // Sesuaikan dengan respons aktual Python
+  cipherdata_b64: string;
+}
+
+export interface GenerateHmacRequest {
+  data_to_hmac_b64: string;
+  hmac_key_material: string;
+}
+export interface PythonGenerateHmacResponse {
+  // Sesuaikan dengan respons aktual Python
+  combined_hash_hex: string;
+}
