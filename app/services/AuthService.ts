@@ -9,6 +9,7 @@ import { SecurityService } from "./security.service.js";
 import { PythonService } from "./PythonService.js";
 import {
   PythonAesDecryptResponse,
+  PythonVerifyHmacResponse,
   PythonVerifyPasswordResponse,
 } from "../http/interfaces/auth.interface.js";
 

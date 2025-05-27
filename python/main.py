@@ -306,9 +306,7 @@ async def sign_data(request: SignRequest):
 
 
 @app.post("/auth/argon2id-hash", response_model=Argon2idHashResponse)
-async def create_argon2id_hash(
-    request: Argon2idHashRequest, api_key: str = Depends(get_api_key)
-):
+async def create_argon2id_hash(request: Argon2idHashRequest):
     try:
         # 🧂 Salt untuk KDF eksternal (misalnya untuk AES)
         salt_for_kdf = os.urandom(16)
@@ -335,10 +333,8 @@ async def create_argon2id_hash(
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
-@app.post("auth/argon2id-verify", response_model=VerifyPasswordResponse)
-async def verify_argon2id_password(
-    request: VerifyPasswordRequest, api_key: str = Depends(get_api_key)
-):
+@app.post("/auth/argon2id-verify", response_model=VerifyPasswordResponse)
+async def verify_argon2id_password(request: VerifyPasswordRequest):
     try:
         ph = PasswordHasher()
         valid = ph.verify(request.hash, request.password)
@@ -366,9 +362,7 @@ async def check_integrity(request: VerifyRequest):
 
 
 @app.post("/data/aes-encrypt-password", response_model=AesEncryptPasswordResponse)
-async def aes_encrypt_password_endpoint(
-    request: AesEncryptPasswordRequest, api_key: str = Depends(get_api_key)
-):
+async def aes_encrypt_password_endpoint(request: AesEncryptPasswordRequest):
     try:
         # Pilih GCM (lebih direkomendasikan) atau CBC
         return await crypto_service.aes_encrypt_password_gcm(request)
@@ -380,9 +374,7 @@ async def aes_encrypt_password_endpoint(
 
 
 @app.post("/data/integrity/generate-hmac", response_model=GenerateHmacResponse)
-async def generate_hmac_endpoint(
-    request: GenerateHmacRequest, api_key: str = Depends(get_api_key)
-):
+async def generate_hmac_endpoint(request: GenerateHmacRequest):
     try:
         return await integrity_service.generate_combined_hmac(request)
     except ValueError as e:
