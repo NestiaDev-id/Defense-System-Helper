@@ -81,8 +81,8 @@ api-application/
 
 API documentation is available at:
 
-- OpenAPI UI: http://localhost:3000
-- OpenAPI JSON: http://localhost:3000/openapi.json
+- OpenAPI UI: https://defense-system-helper.vercel.app/
+- OpenAPI JSON: https://defense-system-helper.vercel.app/api/v1/openapi.json
 
 ## Testing
 
