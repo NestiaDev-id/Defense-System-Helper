@@ -9,121 +9,142 @@ import {
   VerifyPasswordRequest,
   VerifyPasswordResponse,
   PythonErrorResponse,
-  PythonHmacResponse,
-  PythonAesEncryptResponse,
-  PythonArgon2idResponse,
   Argon2idHashRequest,
+  PythonArgon2idHashResponse,
+  PythonAesEncryptPasswordResponse,
 } from "../interfaces/auth.interface.js";
 import { env } from "../../config/env.js";
 import { AuthService } from "../../services/AuthService.js";
 import { validatePassword, validateUsername } from "../../utils/validators.js";
 import { Buffer } from "buffer";
 import { randomBytes } from "crypto";
-import { AuthenticationError } from "../../exceptions/AppError.js";
+import { AppError, AuthenticationError } from "../../exceptions/AppError.js";
+import { PythonService } from "../../services/PythonService.js";
+import { PythonGenerateHmacResponse } from "../interfaces/crypto.interface.js";
+import { ComplexPasswordData } from "../../models/User.js";
 
 type ApiResponse = Record<string, unknown>;
 
 export class AuthController {
   static async register(c: Context) {
-    const { username, password }: RegisterRequest = await c.req.json();
+    const { username, password: user_password }: RegisterRequest =
+      await c.req.json();
 
-    // 1. Validasi Input dari Klien
+    // Langkah 0: Validasi Input Awal
     const usernameValidation = validateUsername(username);
     if (!usernameValidation.isValid) {
       return c.json({ error: usernameValidation.message }, 400);
     }
 
-    const passwordValidation = validatePassword(password);
+    const passwordValidation = validatePassword(user_password);
     if (!passwordValidation.isValid) {
       return c.json({ error: passwordValidation.message }, 400);
     }
 
     try {
-      // 2. Dapatkan Argon2id Hash dan Salt-nya dari Python
-      const argonResponse = await fetch(
-        `${env.PYTHON_API_URL}/auth/argon2id-hash`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-Key": env.PYTHON_SECRET_KEY,
-          },
-          body: JSON.stringify({ password }),
-        }
+      // Langkah 1 & 2 (Alur Anda): Dapatkan Argon2id Hash dan Salt-nya dari Python
+      console.log(
+        `[AuthController] Registering ${username}: Getting Argon2id hash...`
       );
-      if (!argonResponse.ok)
-        throw new Error("Failed to get Argon2id hash from Python");
-      const { hashed_password, salt_argon } =
-        (await argonResponse.json()) as PythonArgon2idResponse;
+      const argon2idResult =
+        await PythonService.callPythonApi<PythonArgon2idHashResponse>(
+          "/auth/argon2id-hash", // Pastikan endpoint ini ada di Python
+          "POST",
+          { password: user_password }
+        );
+      const { hashed_password, salt_argon_hex } = argon2idResult;
+      console.log(
+        `[AuthController] Registering ${username}: Argon2id hash received.`
+      );
 
-      // 3. Hasilkan IV untuk AES di Hono
-      const iv_aes_bytes = randomBytes(16); // crypto dari Node.js
+      // Langkah 3 (Alur Anda): Hasilkan Initialization Vector (IV) untuk AES di Hono
+      const iv_aes_bytes = randomBytes(16); // 16 byte untuk AES-CBC atau 12 byte untuk AES-GCM
       const iv_aes_b64 = iv_aes_bytes.toString("base64");
+      console.log(
+        `[AuthController] Registering ${username}: AES IV generated.`
+      );
 
-      // Minta Python untuk mengenkripsi password menggunakan AES
+      // Langkah 3 (Alur Anda) & 5 (Alur Anda): Minta Python untuk mengenkripsi password asli menggunakan AES
       // Mengirim password asli, salt_argon (untuk KDF kunci AES), dan iv_aes
-      const aesEncryptResponse = await fetch(
-        `${env.PYTHON_API_URL}/data/aes-encrypt-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-Key": env.PYTHON_SECRET_KEY,
-          },
-          body: JSON.stringify({
-            password: password,
-            salt_for_kdf: salt_argon,
+      console.log(
+        `[AuthController] Registering ${username}: Encrypting password with AES...`
+      );
+      const aesResult =
+        await PythonService.callPythonApi<PythonAesEncryptPasswordResponse>(
+          "/data/aes-encrypt-password", // Pastikan endpoint ini ada di Python
+          "POST",
+          {
+            password: user_password,
+            salt_for_kdf: salt_argon_hex, // Kirim salt Argon2id (hex) untuk digunakan Python dalam KDF AES
             iv_b64: iv_aes_b64,
-          }),
-        }
+          }
+        );
+      const { encrypted_password: cipherdata_b64 } = aesResult; // cipherdata sudah base64 dari Python
+      console.log(
+        `[AuthController] Registering ${username}: Password AES encrypted.`
       );
-      if (!aesEncryptResponse.ok)
-        throw new Error("Failed to encrypt password with AES via Python");
-      const { cipherdata } =
-        (await aesEncryptResponse.json()) as PythonAesEncryptResponse; // cipherdata sudah base64 dari Python
 
-      // 4. Minta Python untuk menghasilkan Combined Hash (HMAC)
-      const hmacResponse = await fetch(
-        `${env.PYTHON_API_URL}/integrity/generate-hmac`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-Key": env.PYTHON_SECRET_KEY,
-          },
-          body: JSON.stringify({
-            data_to_hmac: cipherdata, // cipherdata (base64)
+      // Langkah 6 (Alur Anda): Minta Python untuk menghasilkan Combined Hash (HMAC)
+      console.log(
+        `[AuthController] Registering ${username}: Generating HMAC...`
+      );
+      const hmacResult =
+        await PythonService.callPythonApi<PythonGenerateHmacResponse>(
+          "/integrity/generate-hmac", // Pastikan endpoint ini ada di Python
+          "POST",
+          {
+            data_to_hmac_b64: cipherdata_b64, // cipherdata (base64) dari AES
             hmac_key_material: hashed_password, // $hashed_password (output Argon2id) sebagai kunci HMAC
-          }),
-        }
-      );
-      if (!hmacResponse.ok)
-        throw new Error("Failed to generate HMAC via Python");
-      const { combined_hash } =
-        (await hmacResponse.json()) as PythonHmacResponse; // combined_hash (misalnya hex)
+          }
+        );
+      const { combined_hash_hex } = hmacResult; // combined_hash (hex) dari Python
+      console.log(`[AuthController] Registering ${username}: HMAC generated.`);
 
-      // 5. Encode Combined Hash ke Base64 (jika belum)
-      // Asumsi combined_hash dari Python adalah hex, kita ubah ke base64 untuk konsistensi penyimpanan
-      const encoded_combined_hash = Buffer.from(combined_hash, "hex").toString(
-        "base64"
-      );
+      // Langkah 7 (Alur Anda): Encode Combined Hash ke Base64 (jika diterima sebagai hex)
+      const encoded_combined_hmac_b64 = Buffer.from(
+        combined_hash_hex,
+        "hex"
+      ).toString("base64");
 
-      // 6. Simpan ke Database (melalui AuthService Node.js dan UserRepository Node.js)
-      // Anda perlu memodifikasi User model dan UserRepository untuk menyimpan semua field ini.
-      await AuthService.registerComplex(username, {
+      // Persiapkan data untuk disimpan
+      const complexPasswordData: ComplexPasswordData = {
         argon2id_hash: hashed_password,
-        encoded_combined_hmac: encoded_combined_hash,
-        aes_cipherdata_b64: cipherdata,
-        argon_salt_b64: Buffer.from(salt_argon, "hex").toString("base64"), // Jika salt_argon adalah hex dari Python
+        encoded_combined_hmac: encoded_combined_hmac_b64,
+        aes_cipherdata_b64: cipherdata_b64,
+        argon_salt_b64: Buffer.from(salt_argon_hex, "hex").toString("base64"), // Simpan salt Argon2id sebagai base64
         aes_iv_b64: iv_aes_b64,
-      });
+      };
+
+      // Langkah 8 (Alur Anda): Simpan ke Database melalui AuthService Node.js
+      console.log(
+        `[AuthController] Registering ${username}: Saving to database...`
+      );
+      const newUser = await AuthService.registerComplex(
+        username,
+        complexPasswordData
+      );
+      console.log(
+        `[AuthController] Registering ${username}: User saved with ID ${newUser.id}.`
+      );
 
       return c.json({
-        message: "User registered successfully with complex password storage.",
+        message: "User registered successfully using complex password storage.",
+        userId: newUser.id,
       });
     } catch (error: any) {
-      console.error("Complex registration error:", error);
-      return c.json({ error: error.message || "Registration failed" }, 500);
+      console.error(
+        `[AuthController] Registration failed for ${username}:`,
+        error
+      );
+      if (error instanceof AppError) {
+        // AppError dari PythonService atau AuthService
+        return c.json({ error: error.message }, 500);
+      }
+      // Error tidak terduga lainnya
+      return c.json(
+        { error: "An unexpected error occurred during registration." },
+        500
+      );
     }
   }
 
