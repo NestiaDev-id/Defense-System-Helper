@@ -37,7 +37,65 @@ export const openApiDoc = {
         },
         responses: {
           "200": {
-            description: "User registered successfully",
+            description: "Login successful",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    accessToken: {
+                      type: "string",
+                      description:
+                        "JWT access token for authenticated requests.",
+                      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    },
+                    refreshToken: {
+                      type: "string",
+                      description: "Token used to refresh the access token.",
+                      example: "def50200a3f2b6a43b...",
+                    },
+                  },
+                  required: ["accessToken", "refreshToken"],
+                },
+              },
+            },
+          },
+          "400": {
+            description: "Invalid input or validation error",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "string",
+                      description:
+                        "Descriptive error message for validation or input failure.",
+                      example: "Password must be at least 6 characters long.",
+                    },
+                  },
+                  required: ["error"],
+                },
+              },
+            },
+          },
+          "409": {
+            description: "Conflict - e.g., username already exists",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "string",
+                      description: "Conflict or duplication error message.",
+                      example: "Username already taken",
+                    },
+                  },
+                  required: ["error"],
+                },
+              },
+            },
           },
         },
       },
@@ -69,7 +127,8 @@ export const openApiDoc = {
                 schema: {
                   type: "object",
                   properties: {
-                    token: { type: "string" },
+                    accessToken: { type: "string" },
+                    refreshToken: { type: "string" },
                   },
                 },
               },
