@@ -1705,10 +1705,31 @@ export const openApiDoc = {
         tags: ["Post-Quantum Hybrid"],
         summary: "Encrypt data using NTRU + AES-GCM hybrid scheme",
         requestBody: {
-          /* ... schema dengan ntruPublicKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  plaintext: {
+                    type: "string",
+                    description: "The original plaintext to be encrypted.",
+                    example: "Hello, world!",
+                  },
+                  publicKey: {
+                    type: "string",
+                    description: "Public key used for post-quantum encryption.",
+                    example: "base64encodedPublicKey==",
+                  },
+                },
+                required: ["plaintext", "publicKey"],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridEncryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1717,10 +1738,51 @@ export const openApiDoc = {
         tags: ["Post-Quantum Hybrid"],
         summary: "Decrypt data using NTRU + AES-GCM hybrid scheme",
         requestBody: {
-          /* ... schema dengan ntruPrivateKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  ciphertext: {
+                    type: "string",
+                    description: "The encrypted ciphertext.",
+                    example: "base64encodedciphertext==",
+                  },
+                  encapsulatedKey: {
+                    type: "string",
+                    description: "The key used to derive the symmetric key.",
+                    example: "base64encodedKey==",
+                  },
+                  nonce: {
+                    type: "string",
+                    example: "base64encodedNonce==",
+                  },
+                  tag: {
+                    type: "string",
+                    example: "base64encodedTag==",
+                  },
+                  privateKey: {
+                    type: "string",
+                    description:
+                      "Private key used to decrypt the encapsulated key.",
+                    example: "base64encodedPrivateKey==",
+                  },
+                },
+                required: [
+                  "ciphertext",
+                  "encapsulatedKey",
+                  "nonce",
+                  "tag",
+                  "privateKey",
+                ],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridDecryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1729,10 +1791,31 @@ export const openApiDoc = {
         tags: ["Post-Quantum Hybrid"],
         summary: "Encrypt data using NTRU + ChaCha20-Poly1305 hybrid scheme",
         requestBody: {
-          /* ... schema dengan ntruPublicKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  plaintext: {
+                    type: "string",
+                    description: "The original plaintext to be encrypted.",
+                    example: "Hello, world!",
+                  },
+                  publicKey: {
+                    type: "string",
+                    description: "Public key used for post-quantum encryption.",
+                    example: "base64encodedPublicKey==",
+                  },
+                },
+                required: ["plaintext", "publicKey"],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridEncryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1741,10 +1824,51 @@ export const openApiDoc = {
         tags: ["Post-Quantum Hybrid"],
         summary: "Decrypt data using NTRU + ChaCha20-Poly1305 hybrid scheme",
         requestBody: {
-          /* ... schema dengan ntruPrivateKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  ciphertext: {
+                    type: "string",
+                    description: "The encrypted ciphertext.",
+                    example: "base64encodedciphertext==",
+                  },
+                  encapsulatedKey: {
+                    type: "string",
+                    description: "The key used to derive the symmetric key.",
+                    example: "base64encodedKey==",
+                  },
+                  nonce: {
+                    type: "string",
+                    example: "base64encodedNonce==",
+                  },
+                  tag: {
+                    type: "string",
+                    example: "base64encodedTag==",
+                  },
+                  privateKey: {
+                    type: "string",
+                    description:
+                      "Private key used to decrypt the encapsulated key.",
+                    example: "base64encodedPrivateKey==",
+                  },
+                },
+                required: [
+                  "ciphertext",
+                  "encapsulatedKey",
+                  "nonce",
+                  "tag",
+                  "privateKey",
+                ],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridDecryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1754,10 +1878,31 @@ export const openApiDoc = {
         tags: ["Post-Quantum Hybrid"],
         summary: "Encrypt data using McEliece + AES-GCM hybrid scheme",
         requestBody: {
-          /* ... schema dengan mceliecePublicKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  plaintext: {
+                    type: "string",
+                    description: "The original plaintext to be encrypted.",
+                    example: "Hello, world!",
+                  },
+                  publicKey: {
+                    type: "string",
+                    description: "Public key used for post-quantum encryption.",
+                    example: "base64encodedPublicKey==",
+                  },
+                },
+                required: ["plaintext", "publicKey"],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridEncryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1766,10 +1911,51 @@ export const openApiDoc = {
         tags: ["Post-Quantum Hybrid"],
         summary: "Decrypt data using McEliece + AES-GCM hybrid scheme",
         requestBody: {
-          /* ... schema dengan mceliecePrivateKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  ciphertext: {
+                    type: "string",
+                    description: "The encrypted ciphertext.",
+                    example: "base64encodedciphertext==",
+                  },
+                  encapsulatedKey: {
+                    type: "string",
+                    description: "The key used to derive the symmetric key.",
+                    example: "base64encodedKey==",
+                  },
+                  nonce: {
+                    type: "string",
+                    example: "base64encodedNonce==",
+                  },
+                  tag: {
+                    type: "string",
+                    example: "base64encodedTag==",
+                  },
+                  privateKey: {
+                    type: "string",
+                    description:
+                      "Private key used to decrypt the encapsulated key.",
+                    example: "base64encodedPrivateKey==",
+                  },
+                },
+                required: [
+                  "ciphertext",
+                  "encapsulatedKey",
+                  "nonce",
+                  "tag",
+                  "privateKey",
+                ],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridDecryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1779,10 +1965,31 @@ export const openApiDoc = {
         summary:
           "Encrypt data using McEliece + ChaCha20-Poly1305 hybrid scheme",
         requestBody: {
-          /* ... schema dengan mceliecePublicKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  plaintext: {
+                    type: "string",
+                    description: "The original plaintext to be encrypted.",
+                    example: "Hello, world!",
+                  },
+                  publicKey: {
+                    type: "string",
+                    description: "Public key used for post-quantum encryption.",
+                    example: "base64encodedPublicKey==",
+                  },
+                },
+                required: ["plaintext", "publicKey"],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridEncryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1792,10 +1999,51 @@ export const openApiDoc = {
         summary:
           "Decrypt data using McEliece + ChaCha20-Poly1305 hybrid scheme",
         requestBody: {
-          /* ... schema dengan mceliecePrivateKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  ciphertext: {
+                    type: "string",
+                    description: "The encrypted ciphertext.",
+                    example: "base64encodedciphertext==",
+                  },
+                  encapsulatedKey: {
+                    type: "string",
+                    description: "The key used to derive the symmetric key.",
+                    example: "base64encodedKey==",
+                  },
+                  nonce: {
+                    type: "string",
+                    example: "base64encodedNonce==",
+                  },
+                  tag: {
+                    type: "string",
+                    example: "base64encodedTag==",
+                  },
+                  privateKey: {
+                    type: "string",
+                    description:
+                      "Private key used to decrypt the encapsulated key.",
+                    example: "base64encodedPrivateKey==",
+                  },
+                },
+                required: [
+                  "ciphertext",
+                  "encapsulatedKey",
+                  "nonce",
+                  "tag",
+                  "privateKey",
+                ],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridDecryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1805,10 +2053,31 @@ export const openApiDoc = {
         tags: ["Post-Quantum Hybrid"],
         summary: "Encrypt data using BIKE + AES-GCM hybrid scheme",
         requestBody: {
-          /* ... schema dengan bikePublicKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  plaintext: {
+                    type: "string",
+                    description: "The original plaintext to be encrypted.",
+                    example: "Hello, world!",
+                  },
+                  publicKey: {
+                    type: "string",
+                    description: "Public key used for post-quantum encryption.",
+                    example: "base64encodedPublicKey==",
+                  },
+                },
+                required: ["plaintext", "publicKey"],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridEncryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1817,10 +2086,51 @@ export const openApiDoc = {
         tags: ["Post-Quantum Hybrid"],
         summary: "Decrypt data using BIKE + AES-GCM hybrid scheme",
         requestBody: {
-          /* ... schema dengan bikePrivateKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  ciphertext: {
+                    type: "string",
+                    description: "The encrypted ciphertext.",
+                    example: "base64encodedciphertext==",
+                  },
+                  encapsulatedKey: {
+                    type: "string",
+                    description: "The key used to derive the symmetric key.",
+                    example: "base64encodedKey==",
+                  },
+                  nonce: {
+                    type: "string",
+                    example: "base64encodedNonce==",
+                  },
+                  tag: {
+                    type: "string",
+                    example: "base64encodedTag==",
+                  },
+                  privateKey: {
+                    type: "string",
+                    description:
+                      "Private key used to decrypt the encapsulated key.",
+                    example: "base64encodedPrivateKey==",
+                  },
+                },
+                required: [
+                  "ciphertext",
+                  "encapsulatedKey",
+                  "nonce",
+                  "tag",
+                  "privateKey",
+                ],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridDecryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1829,10 +2139,31 @@ export const openApiDoc = {
         tags: ["Post-Quantum Hybrid"],
         summary: "Encrypt data using BIKE + ChaCha20-Poly1305 hybrid scheme",
         requestBody: {
-          /* ... schema dengan bikePublicKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  plaintext: {
+                    type: "string",
+                    description: "The original plaintext to be encrypted.",
+                    example: "Hello, world!",
+                  },
+                  publicKey: {
+                    type: "string",
+                    description: "Public key used for post-quantum encryption.",
+                    example: "base64encodedPublicKey==",
+                  },
+                },
+                required: ["plaintext", "publicKey"],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridEncryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -1841,10 +2172,51 @@ export const openApiDoc = {
         tags: ["Post-Quantum Hybrid"],
         summary: "Decrypt data using BIKE + ChaCha20-Poly1305 hybrid scheme",
         requestBody: {
-          /* ... schema dengan bikePrivateKey ... */
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  ciphertext: {
+                    type: "string",
+                    description: "The encrypted ciphertext.",
+                    example: "base64encodedciphertext==",
+                  },
+                  encapsulatedKey: {
+                    type: "string",
+                    description: "The key used to derive the symmetric key.",
+                    example: "base64encodedKey==",
+                  },
+                  nonce: {
+                    type: "string",
+                    example: "base64encodedNonce==",
+                  },
+                  tag: {
+                    type: "string",
+                    example: "base64encodedTag==",
+                  },
+                  privateKey: {
+                    type: "string",
+                    description:
+                      "Private key used to decrypt the encapsulated key.",
+                    example: "base64encodedPrivateKey==",
+                  },
+                },
+                required: [
+                  "ciphertext",
+                  "encapsulatedKey",
+                  "nonce",
+                  "tag",
+                  "privateKey",
+                ],
+              },
+            },
+          },
         },
         responses: {
-          /* ... */
+          "200": { $ref: "#/components/responses/HybridDecryptSuccess" },
+          "400": { $ref: "#/components/responses/InvalidInputError" },
         },
       },
     },
@@ -2371,29 +2743,108 @@ export const openApiDoc = {
 
     responses: {
       OtpSentSuccessResponse: {
-        description: "OTP sent successfully or dispatch attempted.",
+        description: "OTP successfully sent to the user's email.",
         content: {
           "application/json": {
-            schema: { $ref: "#/components/schemas/OtpSentSuccessBody" },
+            schema: {
+              type: "object",
+              properties: {
+                message: {
+                  type: "string",
+                  example: "OTP sent successfully.",
+                },
+                status: {
+                  type: "string",
+                  example: "success",
+                },
+              },
+            },
           },
         },
       },
       InvalidInputError: {
-        description: "Invalid input or unsupported operation",
+        description: "Invalid input provided.",
         content: {
           "application/json": {
-            schema: { $ref: "#/components/schemas/ErrorResponse" },
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "string",
+                  example: "Invalid email address format.",
+                },
+                statusCode: {
+                  type: "integer",
+                  example: 400,
+                },
+              },
+            },
           },
         },
       },
       UnauthorizedError: {
-        description: "Authentication required or insufficient permissions.",
+        description:
+          "Authentication is required and has failed or has not yet been provided.",
         content: {
           "application/json": {
-            schema: { $ref: "#/components/schemas/ErrorResponse" },
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "string",
+                  example: "Unauthorized access. Please login.",
+                },
+                statusCode: {
+                  type: "integer",
+                  example: 401,
+                },
+              },
+            },
           },
         },
       },
+      TooManyRequestsError: {
+        description:
+          "Too many requests have been made in a short time. Rate limit exceeded.",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "string",
+                  example: "Too many OTP requests. Please try again later.",
+                },
+                statusCode: {
+                  type: "integer",
+                  example: 429,
+                },
+              },
+            },
+          },
+        },
+      },
+      OtpServiceUnavailableError: {
+        description: "The OTP service is currently unavailable.",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "string",
+                  example: "OTP service is temporarily unavailable.",
+                },
+                statusCode: {
+                  type: "integer",
+                  example: 503,
+                },
+              },
+            },
+          },
+        },
+      },
+
       NotFoundError: {
         description: "The requested resource was not found.",
         content: {
@@ -2454,48 +2905,101 @@ export const openApiDoc = {
           attemptsRemaining: { type: "integer", nullable: true },
         },
       },
+
       OtpVerifySuccessResponse: {
-        description: "OTP verification successful.",
+        description: "OTP was successfully verified.",
         content: {
           "application/json": {
-            schema: { $ref: "#/components/schemas/OtpVerifySuccessBody" },
+            schema: {
+              type: "object",
+              properties: {
+                accessToken: {
+                  type: "string",
+                },
+                refreshToken: {
+                  type: ["string", "null"],
+                },
+                message: {
+                  type: "string",
+                },
+              },
+            },
           },
         },
       },
       OtpVerifyFailedResponse: {
-        description:
-          "OTP verification failed (e.g., invalid code, expired, session not found).",
+        description: "OTP verification failed due to invalid or expired code.",
         content: {
           "application/json": {
-            schema: { $ref: "#/components/schemas/OtpVerifyFailedBody" },
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "string",
+                  example: "Invalid or expired OTP code.",
+                },
+                statusCode: {
+                  type: "integer",
+                  example: 400,
+                },
+              },
+            },
           },
         },
       },
+      HybridEncryptSuccess: {
+        description: "Data successfully encrypted using the hybrid scheme.",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                ciphertext: {
+                  type: "string",
+                  example: "base64encodedciphertext==",
+                },
+                encapsulatedKey: {
+                  type: "string",
+                  example: "base64encodedKey==",
+                },
+                nonce: { type: "string", example: "base64encodedNonce==" },
+                tag: { type: "string", example: "base64encodedTag==" },
+              },
+            },
+          },
+        },
+      },
+      HybridDecryptSuccess: {
+        description: "Data successfully decrypted using the hybrid scheme.",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                plaintext: {
+                  type: "string",
+                  example: "Hello, post-quantum world!",
+                },
+              },
+            },
+          },
+        },
+      },
+      // InvalidInputError: {
+      //   description: "Invalid input provided.",
+      //   content: {
+      //     "application/json": {
+      //       schema: {
+      //         type: "object",
+      //         properties: {
+      //           error: { type: "string", example: "Invalid key format." },
+      //           statusCode: { type: "integer", example: 400 },
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
 
-      TooManyRequestsError: {
-        description: "Too many requests. Please try again later.",
-        content: {
-          "application/json": {
-            schema: { $ref: "#/components/schemas/ErrorResponse" },
-          },
-        },
-        headers: {
-          "Retry-After": {
-            description:
-              "The number of seconds to wait before making a new request, or a specific date.",
-            schema: { type: "integer" },
-          },
-        },
-      },
-      OtpServiceUnavailableError: {
-        description:
-          "OTP service temporarily unavailable for the selected channel.",
-        content: {
-          "application/json": {
-            schema: { $ref: "#/components/schemas/ErrorResponse" },
-          },
-        },
-      },
       DecryptionError: {
         // Dari definisi sebelumnya, masih relevan
         description:
