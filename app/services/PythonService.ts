@@ -89,4 +89,14 @@ export class PythonService {
   }) {
     return this.makeRequest("/integrity/generate-hmac", "POST", payload);
   }
+
+  static async callPythonApi<TResponse>(
+    endpoint: string,
+    method: string,
+    body?: any
+  ): Promise<TResponse> {
+    // Cukup panggil makeRequest dan lakukan cast ke tipe TResponse yang diharapkan.
+    // makeRequest sudah menangani parsing JSON dan error.
+    return this.makeRequest(endpoint, method, body) as Promise<TResponse>;
+  }
 }

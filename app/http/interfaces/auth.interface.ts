@@ -57,6 +57,12 @@ export interface PythonHashPasswordResponse {
 export interface PythonVerifyPasswordResponse {
   valid: boolean;
 }
+export interface PythonAesDecryptResponse {
+  decrypted_data: string; // Atau nama field yang sesuai dari Python
+}
+export interface PythonVerifyHmacResponse {
+  valid: boolean;
+}
 
 export interface PythonRefreshTokenSuccessResponse {
   access_token: string;

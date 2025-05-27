@@ -9,7 +9,6 @@ import {
   VerifyPasswordRequest,
   VerifyPasswordResponse,
   PythonErrorResponse,
-  PythonLoginSuccessResponse,
   PythonHmacResponse,
   PythonAesEncryptResponse,
   PythonArgon2idResponse,
@@ -20,12 +19,13 @@ import { AuthService } from "../../services/AuthService.js";
 import { validatePassword, validateUsername } from "../../utils/validators.js";
 import { Buffer } from "buffer";
 import { randomBytes } from "crypto";
+import { AuthenticationError } from "../../exceptions/AppError.js";
 
 type ApiResponse = Record<string, unknown>;
 
 export class AuthController {
   static async register(c: Context) {
-    const { username, password }: RegisterRequest = await c.req.json(); // 1. Dapat request
+    const { username, password }: RegisterRequest = await c.req.json();
 
     // 1. Validasi Input dari Klien
     const usernameValidation = validateUsername(username);
@@ -39,7 +39,7 @@ export class AuthController {
     }
 
     try {
-      // 1. & 2. Dapatkan Argon2id Hash dan Salt-nya dari Python
+      // 2. Dapatkan Argon2id Hash dan Salt-nya dari Python
       const argonResponse = await fetch(
         `${env.PYTHON_API_URL}/auth/argon2id-hash`,
         {
@@ -72,7 +72,7 @@ export class AuthController {
           },
           body: JSON.stringify({
             password: password,
-            salt_for_kdf: salt_argon, // Salt Argon2id digunakan lagi untuk KDF kunci AES
+            salt_for_kdf: salt_argon,
             iv_b64: iv_aes_b64,
           }),
         }
@@ -130,61 +130,35 @@ export class AuthController {
   static async login(c: Context) {
     const { username, password }: LoginRequest = await c.req.json();
 
-    // 1. Validasi Input dari Klien (Username & Password)
     const usernameValidation = validateUsername(username);
     if (!usernameValidation.isValid) {
       return c.json({ error: usernameValidation.message }, 400);
     }
+
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
       return c.json({ error: passwordValidation.message }, 400);
     }
 
     try {
-      const pythonLoginResponse = await fetch(
-        `${env.PYTHON_API_URL}/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-Key": env.PYTHON_SECRET_KEY,
-          },
-          body: JSON.stringify({ username, password }),
-        }
-      );
-
-      const responseBody = await pythonLoginResponse.json();
-
-      if (!pythonLoginResponse.ok) {
-        const errorDetail =
-          (responseBody as PythonErrorResponse)?.detail ||
-          "Invalid credentials from Python";
-        console.error("Python login error:", errorDetail);
-        return c.json(
-          {
-            error:
-              typeof errorDetail === "string"
-                ? errorDetail
-                : JSON.stringify(errorDetail),
-          },
-          401
-        );
-      }
-
-      // Dapatkan username dari respons Python jika login Python berhasil
-      const pythonData = responseBody as PythonLoginSuccessResponse;
-
-      // Hono generate tokennya sendiri
-      const token = await SecurityService.generateJWT({
-        username: pythonData.username || username,
-      });
+      // Panggil metode login kompleks yang baru di AuthService
+      const token = await AuthService.loginComplex(username, password);
       return c.json<TokenResponse>({ token });
     } catch (error: any) {
-      console.error("Login fetch/parse error:", error);
-      return c.json(
-        { error: error.message || "Login failed due to an unexpected error" },
-        500
-      );
+      console.error("Login process error in AuthController:", error.message);
+      if (error instanceof AuthenticationError) {
+        // Tangani error spesifik dari AuthService
+        return c.json({ error: error.message }, 401);
+      }
+      if (error.response && error.response.data) {
+        // Error dari PythonService/fetch
+        const pythonError = error.response.data as { detail?: string };
+        return c.json(
+          { error: pythonError.detail || "Login failed via Python service" },
+          error.response.status || 500
+        );
+      }
+      return c.json({ error: error.message || "Login failed" }, 500);
     }
   }
 
