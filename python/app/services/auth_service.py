@@ -33,6 +33,7 @@ class AuthService:
 
     async def login(self, user: User) -> LoginResponse:
         stored_hash = self.users.get(user.username)
+
         if not stored_hash or not bcrypt.checkpw(user.password.encode(), stored_hash):
             raise ValueError("Invalid credentials")
 

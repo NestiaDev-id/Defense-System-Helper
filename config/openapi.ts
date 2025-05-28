@@ -47,19 +47,11 @@ export const openApiDoc = {
                 schema: {
                   type: "object",
                   properties: {
-                    accessToken: {
-                      type: "string",
-                      description:
-                        "JWT access token for authenticated requests.",
-                      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                    },
-                    refreshToken: {
-                      type: "string",
-                      description: "Token used to refresh the access token.",
-                      example: "def50200a3f2b6a43b...",
-                    },
-                  },
-                  required: ["accessToken", "refreshToken"],
+                  message: {
+                    type: "string",
+                    description: "Registration successful",
+                    example: "User registered successfully",
+                  }
                 },
               },
             },
