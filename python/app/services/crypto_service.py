@@ -2,7 +2,7 @@ import os
 import secrets
 import hashlib
 import base64
-from pqcrypto.pqclean import crypto_kem as kyber_kem
+from kyber_py.ml_kem import ML_KEM_512
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import hashes
@@ -24,6 +24,7 @@ from cryptography.hazmat.primitives import padding
 class CryptoService:
     def __init__(self):
         self.salt = os.urandom(16)  # Generate a random salt for each instance
+        self.kyber_kem = ML_KEM_512  # Initialize Kyber KEM instance
 
     def derive_key(self, key: str, salt: bytes = None) -> tuple[bytes, bytes]:
         if salt is None:
@@ -38,13 +39,11 @@ class CryptoService:
         return derived_key, salt
 
     async def generate_kem_key_pair(self) -> dict:
-        # For demo purposes, we'll generate a simple key pair
-        # In production, use proper KEM algorithms
-        public_key, private_key = kyber_kem.generate_keypair()
+        # Gunakan self.kyber_kem, bukan variabel yang tidak didefinisikan
+        public_key, private_key = self.kyber_kem.keygen()
 
-        # private_key = secrets.token_urlsafe(32)
-        # public_key = hashlib.sha256(private_key.encode()).hexdigest()
-        return {"publicKey": public_key, "privateKey": private_key}
+        # Anda bisa mengembalikan dalam bentuk hex/base64 agar lebih mudah disimpan atau dikirim
+        return {"publicKey": public_key.hex(), "privateKey": private_key.hex()}
 
     async def generate_sign_key_pair(self) -> dict:
         # For demo purposes, we'll generate a simple key pair
@@ -108,7 +107,7 @@ class CryptoService:
         public_key = base64.b64decode(kyber_public_key_b64)
 
         # Langkah 1: Enkapsulasi → dapatkan shared_secret & ciphertext (encapsulated key)
-        encapsulated_key, shared_secret = kyber_kem.encapsulate(public_key)
+        encapsulated_key, shared_secret = self.kyber_kem.encapsulate(public_key)
 
         # Langkah 2: Enkripsi simetris pakai AES-GCM
         iv = os.urandom(12)
@@ -136,7 +135,7 @@ class CryptoService:
         encapsulated_key = base64.b64decode(encapsulated_key_b64)
 
         # Dapatkan kembali shared secret yang sama
-        shared_secret = kyber_kem.decapsulate(encapsulated_key, private_key)
+        shared_secret = self.kyber_kem.decapsulate(encapsulated_key, private_key)
 
         # Dekripsi dengan AES-GCM
         ciphertext_aes = base64.b64decode(encrypted_data_b64)

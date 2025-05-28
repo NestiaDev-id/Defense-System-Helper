@@ -17,7 +17,6 @@ import jwt
 from datetime import datetime, timedelta
 from argon2 import PasswordHasher, exceptions as argon2_exceptions
 
-
 # Import services
 from python.app.services.auth_service import AuthService
 from python.app.services.crypto_service import CryptoService
