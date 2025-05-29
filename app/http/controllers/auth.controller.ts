@@ -115,6 +115,28 @@ export class AuthController {
         aes_iv_b64: iv_aes_b64,
       };
 
+      // Simpan ke firebase
+      const firebaseServiceAccount = env.FIREBASE_SERVICE_ACCOUNT_JSON
+        ? JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_JSON)
+        : null;
+      if (!firebaseServiceAccount) {
+        console.warn(
+          "FIREBASE_SERVICE_ACCOUNT_JSON tidak diatur. Firebase Admin SDK tidak akan diinisialisasi."
+        );
+      } else {
+        console.log(
+          `[AuthController] Registering ${username}: Saving to Firebase...`
+        );
+        await FirebaseService.registerComplexPassword(
+          firebaseServiceAccount,
+          username,
+          complexPasswordData
+        );
+        console.log(
+          `[AuthController] Registering ${username}: User saved to Firebase.`
+        );
+      }
+
       // Langkah 8 (Alur Anda): Simpan ke Database melalui AuthService Node.js
       console.log(
         `[AuthController] Registering ${username}: Saving to database...`
