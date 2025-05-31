@@ -1,0 +1,88 @@
+version: '3.8' # Atau versi yang lebih baru jika Anda mau
+
+services:
+  # Frontend Vite.js
+  frontend:
+    build:
+      context: ./frontend # Path ke direktori frontend Anda
+      dockerfile: Dockerfile # Asumsi Dockerfile ada di ./frontend/Dockerfile
+    ports:
+      - "5173:5173" # Map port Vite dev server (host:container)
+    environment:
+      # Variabel ini akan digunakan oleh Vite untuk tahu URL API backend Hono
+      # 'hono_backend' adalah nama layanan Hono di Docker Compose ini
+      - VITE_API_URL=http://hono_backend:3000 
+    volumes:
+      # Mount source code frontend untuk hot-reloading jika dev server Vite di Dockerfile mendukungnya
+      - ./frontend:/app
+      # Hindari menimpa node_modules di dalam container dengan yang ada di host
+      - /app/node_modules 
+    # depends_on: # Opsional, bisa membantu urutan startup
+    #   - hono_backend
+
+  # Backend Hono/Node.js
+  hono_backend:
+    build:
+      context: . # Root direktori proyek Anda
+      dockerfile: Dockerfile.hono # Nama Dockerfile khusus untuk Hono, letakkan di root proyek
+    ports:
+      - "3000:3000" # Map port aplikasi Hono Anda
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - HONO_SECRET_KEY=secret_hono_development_key # Ganti dengan secret dev Anda
+      # 'python_backend' adalah nama layanan Python di Docker Compose ini
+      - PYTHON_API_URL=http://python_backend:8000/api/v1 # Sesuaikan path jika berbeda (/py/)
+      - PYTHON_SECRET_KEY=kunci_rahasia_python_untuk_hono # Harus sama dengan API_KEY di Python
+      # Tambahkan variabel lingkungan lain yang dibutuhkan Hono di sini
+      # Misalnya: FIREBASE_SERVICE_ACCOUNT_JSON, MONGODB_URI, SUPABASE_URL, dll.
+    volumes:
+      # Mount source code utama untuk hot-reloading jika server Node.js Anda mendukungnya (misalnya dengan nodemon/tsx watch)
+      # Jika Dockerfile Anda menyalin semua dan 'npm run build' ada di Dockerfile, mount ini mungkin hanya untuk source code saja
+      - ./src:/usr/src/app/src
+      - ./app:/usr/src/app/app
+      - ./config:/usr/src/app/config
+      - ./package.json:/usr/src/app/package.json
+      - ./package-lock.json:/usr/src/app/package-lock.json
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+      # Hindari menimpa node_modules di dalam container
+      - /usr/src/app/node_modules
+    # depends_on: # Opsional
+    #   - python_backend
+
+  # Backend Python/FastAPI
+  python_backend:
+    build:
+      context: ./python # Path ke direktori Python Anda
+      dockerfile: Dockerfile # Asumsi Dockerfile ada di ./python/Dockerfile
+    ports:
+      - "8000:8000" # Map port aplikasi FastAPI/Uvicorn Anda
+    environment:
+      - DEBUG=True
+      - API_KEY=kunci_rahasia_python_untuk_hono # Harus sama dengan PYTHON_SECRET_KEY di Hono
+      - JWT_SECRET_KEY=secret_python_jwt_development_key # Ganti dengan secret dev Anda
+      - APP_ROOT_PATH=/api/v1 # Atau /py, atau path yang Anda gunakan
+      - CORS_ORIGIN=http://localhost:5173,http://localhost:3000 # Izinkan akses dari frontend dan Hono dev
+      # Tambahkan variabel lingkungan lain yang dibutuhkan Python di sini
+    volumes:
+      # Mount source code Python untuk hot-reloading jika Uvicorn dijalankan dengan --reload
+      - ./python:/app
+      # Jika Anda menggunakan venv di dalam container dan ingin mengisolasinya dari mount:
+      # - /app/venv 
+
+# Opsional: Definisikan jaringan kustom agar layanan bisa berkomunikasi menggunakan nama layanan
+# networks:
+#   app_net:
+#     driver: bridge
+
+# Jika menggunakan jaringan kustom, tambahkan ke setiap layanan:
+# services:
+#   frontend:
+#     networks:
+#       - app_net
+#   hono_backend:
+#     networks:
+#       - app_net
+#   python_backend:
+#     networks:
+#       - app_net
