@@ -21,7 +21,7 @@ app.get(
   "/",
   apiReference({
     theme: "default",
-    layout: "classic",
+    layout: "modern",
     spec: {
       url: "/openapi.json",
     },
